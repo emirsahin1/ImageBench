@@ -10,10 +10,10 @@ private:
 	float mouseX, mouseY, panAmountX, panAmountY;
 	bool isPanning;
 	wxImage image;
-	wxBitmap rendImage;
+	wxImage rendImage;
 private:
 	void onScroll(wxMouseEvent& evt);
-	wxBitmap fitToRatio(wxImage image, int neww, int newh);
+	void fitToRatio(wxImage image, int neww, int newh);
 	void panHandler(wxMouseEvent& evt);
 	void leftDown(wxMouseEvent& evt);
 	void leftUp(wxMouseEvent& evt);

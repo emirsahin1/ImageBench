@@ -26,7 +26,8 @@ ImagePanel::ImagePanel(wxWindow* parent, wxString file, wxBitmapType format) :
 void ImagePanel::paintEvent(wxPaintEvent& evt) {
 	wxPaintDC dc(this);
 	dc.GetSize(&canvw, &canvh);
-	rendImage = fitToRatio(image, canvw, canvh);
+	fitToRatio(image, canvw, canvh);
+	rendImage = image.Scale(imgw, imgh );
 	render(dc);
 }
 
@@ -37,25 +38,24 @@ void ImagePanel::paintNow() {
 
 /*Renders the image stored in rendImage*/
 void ImagePanel::render(wxDC& dc) {
-	//dc.SetUserScale(scale, scale);
-	dc.DrawBitmap(rendImage,  (panAmountX + imageOffsetX)/scale, ((canvh - imgh)/2) + (panAmountY + imageOffsetY)/scale, false);
+	dc.SetUserScale(scale, scale);
+	dc.DrawBitmap(wxBitmap(rendImage, wxIMAGE_QUALITY_HIGH), (canvw/scale - imgw)/2 + (panAmountX + imageOffsetX)/scale, (canvh/scale - imgh)/2 + (panAmountY + imageOffsetY)/scale, false);
 }
 
-wxBitmap ImagePanel::fitToRatio(wxImage image, int contw, int conth) {
+void ImagePanel::fitToRatio(wxImage image, int contw, int conth) {
 	imgw = image.GetWidth();
 	imgh = image.GetHeight();
 	float newAspRatio = (float)contw / conth;
 	if (imgh > conth) {
 		imgh = contw / aspRatio;
 		imgw = contw;
-		return wxBitmap(image.Scale(imgw, imgh), wxIMAGE_QUALITY_HIGH);
 	}
 	/*else if (oldw > contw) {
 		oldh = conth;
 		oldw = conth * aspRatio;
 		return wxBitmap(image.Scale(oldw, oldh), wxIMAGE_QUALITY_HIGH);
 	}*/
-	else return wxBitmap(image);
+	//else return image;
 }
 	
 void ImagePanel::onScroll(wxMouseEvent& evt){

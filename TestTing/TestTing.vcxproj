@@ -169,6 +169,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestTing.h" />
+    <ClInclude Include="Theme.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TestTing.rc" />

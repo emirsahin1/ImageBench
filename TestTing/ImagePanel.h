@@ -11,6 +11,7 @@ private:
 	bool isPanning;
 	wxImage image;
 	wxImage rendImage;
+	bool ratioFit;
 private:
 	void onScroll(wxMouseEvent& evt);
 	void fitToRatio(wxImage image, int neww, int newh);

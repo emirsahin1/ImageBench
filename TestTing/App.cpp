@@ -14,12 +14,14 @@ App::~App()
 
 bool App::OnInit()
 {
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 	wxInitAllImageHandlers();
 	mainWindow = new MainW();
 	mainWindow->Maximize(true);
 	mainWindow->SetBackgroundColour(BACKGROUND_COLOR);
 	mainWindow->Show();
-	//mainWindow->m_flSelector->ShowModal();
 
 	return true;
 }

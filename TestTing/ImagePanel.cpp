@@ -1,6 +1,7 @@
 #include "ImagePanel.h"
 #include <io.h>
-#include <wx/log.h> 
+#include <wx/log.h>
+#include <iostream>
 
 wxBEGIN_EVENT_TABLE(ImagePanel, wxPanel)
 	EVT_PAINT(ImagePanel::paintEvent)
@@ -11,33 +12,62 @@ wxBEGIN_EVENT_TABLE(ImagePanel, wxPanel)
 	EVT_LEFT_UP(ImagePanel::leftUp)
 wxEND_EVENT_TABLE()
 
-ImagePanel::ImagePanel(wxWindow* parent, wxString file, wxBitmapType format) :
+ImagePanel::ImagePanel(wxWindow* parent) :
 	wxPanel(parent) {
 	SetDoubleBuffered(true);
-	image.LoadFile(file, format);
-	rendImage = image;
 	isPanning = false; 
 	imageOffsetX, imageOffsetY = 0;
 	canvw, canvh, scale = 1;
+}
+
+void ImagePanel::loadImage(wxString path) {
+	image.LoadFile(path, wxBITMAP_TYPE_ANY);
+	if (image.IsOk()) {
+		initImageProps();
+		Refresh();
+	}
+}
+
+void ImagePanel::loadImage(uint8_t* imageData, int x, int y)
+{
+	image = wxImage(x, y, imageData, true);
+	if (image.IsOk()) {
+		initImageProps();
+		Refresh();
+	}
+}
+
+void ImagePanel::loadImage(uint8_t* imageData, uint8_t* imageAlpha, int x, int y)
+{
+	image = wxImage(x, y, imageData, imageAlpha, true);
+	if (image.IsOk()) {
+		initImageProps();
+		Refresh();
+	}
+}
+
+void ImagePanel::initImageProps()
+{
+	scale = 1;
+	imageOffsetX = 0;
+	imageOffsetY = 0;
 	imgw = image.GetWidth();
 	imgh = image.GetHeight();
-	rendImage = image.Scale(imgw, imgh, wxIMAGE_QUALITY_NORMAL);
 	aspRatio = imgw / imgh;
-	ratioFit = false;
+	//Fits the image w and h to the desired ratio before render. 
+	fitImageToRatio(canvw, canvh);
+	rendImage = (wxBitmap)image.Scale(imgw, imgh, wxIMAGE_QUALITY_BILINEAR);
 }
 
 void ImagePanel::paintEvent(wxPaintEvent& evt) {
 	wxPaintDC dc(this);
 	dc.GetSize(&canvw, &canvh);
-	if (!ratioFit) {
-		fitToRatio(image, canvw, canvh);
-		rendImage = image.Scale(imgw, imgh, wxIMAGE_QUALITY_NORMAL);
-		ratioFit = true;
+	if (image.IsOk()) {
+		/*if (abs((rendImage.GetWidth() - imgw)) > 1 || abs((rendImage.GetHeight() - imgh)) > 1) {
+			rendImage = image.Scale(imgw, imgh, wxIMAGE_QUALITY_NORMAL);
+		}*/
+		render(dc);
 	}
-	/*if (abs((rendImage.GetWidth() - imgw)) > 1 || abs((rendImage.GetHeight() - imgh)) > 1) {
-		rendImage = image.Scale(imgw, imgh, wxIMAGE_QUALITY_NORMAL);
-	}*/
-	render(dc);
 }
 
 void ImagePanel::paintNow() {
@@ -45,27 +75,25 @@ void ImagePanel::paintNow() {
 	render(dc);
 }
 
-/*Renders the image stored in rendImage*/
 void ImagePanel::render(wxDC& dc) {
 	dc.SetUserScale(scale, scale);
-	dc.DrawBitmap(wxBitmap(rendImage),
+	dc.DrawBitmap(rendImage,
 		(canvw/scale - imgw)/2 + (panAmountX + imageOffsetX)/scale, 
 		(canvh/scale - imgh)/2 + (panAmountY + imageOffsetY)/scale, false);
 }
 
-void ImagePanel::fitToRatio(wxImage image, int contw, int conth) {
-	imgw = image.GetWidth();
-	imgh = image.GetHeight();
-	float newAspRatio = (float)contw / conth;
-	if (imgh > conth) {
-		imgh = contw / aspRatio;
-		imgw = contw;
+void ImagePanel::fitImageToRatio(int contw, int conth) {
+	if (image.IsOk()) {
+		float newAspRatio = (float)contw / conth;
+		//if (imgh > conth) {
+			imgh = contw / aspRatio;
+			imgw = contw;
+		//}
+	    /*else if (imgw > contw) {
+			imgh = conth;
+			imgw = conth * aspRatio;
+		}*/
 	}
-	/*else if (oldw > contw) {
-		oldh = conth;
-		oldw = conth * aspRatio;
-		return wxBitmap(image.Scale(oldw, oldh), wxIMAGE_QUALITY_HIGH);
-	}*/
 	//else return image;
 }
 	

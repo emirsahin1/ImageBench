@@ -10,6 +10,8 @@ public:
 	wxDECLARE_EVENT_TABLE();
 
 public:
+	ImagePanel* imagePanel = nullptr;
+	wxString imagePath;
 	wxBoxSizer* hBox = nullptr; 
 	wxPanel* mainPanel = nullptr; 
 	wxButton* m_btn1 = nullptr; 

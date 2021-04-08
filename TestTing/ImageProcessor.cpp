@@ -4,13 +4,12 @@
 #include "ImageProcessor.h"
 
 
-Image removeGreenScreen(const char* path) {
+void ImageProcessor::loadImage(const char* path) {
 	int channelsRequired = 4;
 	int x, y, numbChannels;
 	
-	Image img;
 	uint8_t* fullImageData = stbi_load(path, &x, &y, &numbChannels, channelsRequired);
-	uint8_t* imageDataUse = stbi_load(path, &x, &y, &numbChannels, 3);
+	uint8_t* imageDataRGB = stbi_load(path, &x, &y, &numbChannels, 3);
 	uint8_t* imageAlpha = NULL;
 
 	if (numbChannels > 3) {
@@ -20,11 +19,9 @@ Image removeGreenScreen(const char* path) {
 		}
 	}
 	if (fullImageData != NULL) {
-		img.x = x;
-		img.y = y;
-		img.imgData = imageDataUse;
-		img.imgAlpha = imageAlpha;
+		imageWidth = x;
+		imageHeight = y;
+		imgData = imageDataRGB;
+		imgAlpha = imageAlpha;
 	}
-
-	return img;
 }

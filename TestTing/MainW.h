@@ -1,5 +1,6 @@
 #pragma once
 #include <wx/wx.h>
+#include <wx/colordlg.h>
 #include "ImagePanel.h"
 
 class MainW : public wxFrame
@@ -19,8 +20,9 @@ public:
 	wxListBox* m_lstbox = nullptr; 
 	wxFileDialog* m_flSelector;
 	wxMenuBar* m_menuBar = nullptr; 
-	wxMenu* m_menu = nullptr; 	
-
-	void OnButtonClicked(wxCommandEvent &evt);
+	wxMenu* m_menu = nullptr; 
+	wxColourDialog* m_clrDiag = nullptr;
+	void ColorPickerButton(wxCommandEvent& evt);
+	void LoadImageButton(wxCommandEvent &evt);
 };
 

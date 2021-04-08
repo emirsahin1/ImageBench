@@ -21,6 +21,7 @@ bool App::OnInit()
 	mainWindow = new MainW();
 	mainWindow->Maximize(true);
 	mainWindow->SetBackgroundColour(BACKGROUND_COLOR);
+	mainWindow->SetCursor(wxCursor(wxImage("CursorTest.png")));
 	mainWindow->Show();
 
 	return true;

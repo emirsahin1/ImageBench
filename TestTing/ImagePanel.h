@@ -28,12 +28,15 @@ private:
 	void bgErase(wxEraseEvent& evt);
 	void onSize(wxSizeEvent& evt);
 	void initImageProps();
+	void initBitmapProps(wxBitmap bitmap);
+	wxBitmap* RGBAtoBitmap(unsigned char* rgba, int w, int h);
 
 public:
 	ImagePanel(wxWindow* parent);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow();
 	void loadImage(wxString path);
+	void loadImage(uint8_t* imageData, int x, int y, int channels);
 	void loadImage(uint8_t* imageData, int x, int y);
 	void loadImage(uint8_t* imageData, uint8_t* alphaData, int x, int y);
 	void setLoading(bool isLoading);

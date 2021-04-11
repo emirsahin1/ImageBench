@@ -1,5 +1,6 @@
 #include "ImagePanel.h"
 #include "wx/timer.h"
+#include <wx/rawbmp.h>
 
 wxBEGIN_EVENT_TABLE(ImagePanel, wxPanel)
 	EVT_PAINT(ImagePanel::paintEvent)
@@ -28,6 +29,21 @@ void ImagePanel::loadImage(wxString path) {
 	image.LoadFile(path, wxBITMAP_TYPE_PNG);
 	if (image.IsOk()) {
 		initImageProps();
+		rendImage = (wxBitmap)image;
+		Refresh();
+	}
+}
+
+void ImagePanel::loadImage(uint8_t* imageData, int x, int y, int channels) {
+	isLoading = true;
+	Refresh();
+	Update();
+
+	wxBitmap bitmapImage = *RGBAtoBitmap(imageData, x, y);
+	if (bitmapImage.IsOk()) {
+		initBitmapProps(bitmapImage);
+		rendImage = bitmapImage;
+		std::cout << "BITMAPOK"<< " " << bitmapImage.GetWidth();
 		Refresh();
 	}
 }
@@ -39,6 +55,7 @@ void ImagePanel::loadImage(uint8_t* imageData, int x, int y){
 	image = wxImage(x, y, imageData, true);
 	if (image.IsOk()) {
 		initImageProps();
+		rendImage = (wxBitmap)image;
 		Refresh();
 	}
 }
@@ -50,6 +67,7 @@ void ImagePanel::loadImage(uint8_t* imageData, uint8_t* imageAlpha, int x, int y
 	image = wxImage(x, y, imageData, imageAlpha, true);
 	if (image.IsOk()) {
 		initImageProps();
+		rendImage = (wxBitmap)image;
 		Refresh();
 	}
 }
@@ -71,6 +89,18 @@ void ImagePanel::initImageProps(){
 	updateImage();
 }
 
+void ImagePanel::initBitmapProps(wxBitmap bitmap) {
+	scale = 1;
+	imageOffsetX = 0;
+	imageOffsetY = 0;
+	imgw = bitmap.GetWidth();
+	imgh = bitmap.GetHeight();
+	aspRatio = imgw / imgh;
+	//Fits the image w and h to the desired ratio before render. 
+	fitImageToRatio(canvw, canvh);
+	//scale = imgw / image.GetWidth();
+}
+
 //Does not render, but prepares to render. 
 void ImagePanel::paintEvent(wxPaintEvent& evt) {
 	wxPaintDC dc(this);
@@ -78,7 +108,7 @@ void ImagePanel::paintEvent(wxPaintEvent& evt) {
 	imagePosX = (canvw / scale - imgw) / 2 + (panAmountX + imageOffsetX) / scale;
 	imagePosY = (canvh / scale - imgh) / 2 + (panAmountY + imageOffsetY) / scale;
 
-	if (image.IsOk()) {
+	if (rendImage.IsOk()) {
 		/*if (abs((rendImage.GetWidth() - imgw)) > 1 || abs((rendImage.GetHeight() - imgh)) > 1) {
 			rendImage = image.Scale(imgw, imgh, wxIMAGE_QUALITY_NORMAL);
 		}*/
@@ -121,19 +151,17 @@ void ImagePanel::fitImageToRatio(int contw, int conth) {
 		}
 	}*/
 
-	if (image.IsOk()) {
-		float newAspRatio = (float)contw / conth;
-		float newImgw, newImgh;
-		if (imgh < imgw && imgh > conth) {
-			newImgh = contw / aspRatio;
-			newImgw = contw;
-			scale = newImgh / imgh;
-		}
-		else {
-			newImgh = conth;
-			newImgw = conth * aspRatio;
-			scale = newImgh / imgh;
-		}
+	float newAspRatio = (float)contw / conth;
+	float newImgw, newImgh;
+	if (imgh < imgw && imgh > conth) {
+		newImgh = contw / aspRatio;
+		newImgw = contw;
+		scale = newImgh / imgh;
+	}
+	else {
+		newImgh = conth;
+		newImgw = conth * aspRatio;
+		scale = newImgh / imgh;
 	}
 }
 	
@@ -199,8 +227,7 @@ void ImagePanel::drawAtMouse(wxMouseEvent& evt) {
 
 void ImagePanel::updateImage(){
 	//rendImage = (wxBitmap)image.Scale(imgw, imgh, wxIMAGE_QUALITY_BILINEAR);
-	rendImage = (wxBitmap)image;
-
+	//rendImage = (wxBitmap)image;
 }
 
 void ImagePanel::onSize(wxSizeEvent& evt) {
@@ -210,4 +237,51 @@ void ImagePanel::onSize(wxSizeEvent& evt) {
 
 void ImagePanel::bgErase(wxEraseEvent& evt) {
 
+}
+
+wxBitmap* ImagePanel::RGBAtoBitmap(uint8_t* rgba, int w, int h)
+{
+	wxBitmap* bitmap = new wxBitmap(w, h, wxBITMAP_SCREEN_DEPTH);
+	if (!bitmap->Ok()) {
+		delete bitmap;
+		return NULL;
+	}
+
+	wxAlphaPixelData bmdata(*bitmap);
+	if (bmdata == NULL) {
+		wxLogDebug(wxT("getBitmap() failed"));
+		delete bitmap;
+		return NULL;
+	}
+
+	wxAlphaPixelData::Iterator dst(bmdata);
+
+	//for (int y = 0; y < h; y++) {
+	//	dst.MoveTo(bmdata, 0, y);
+	//	for (int x = 0; x < w; x++) {
+	//		// wxBitmap contains rgb values pre-multiplied with alpha
+	//		unsigned char a = rgba[3];
+	//		dst.Red() = rgba[0] * a / 255;
+	//		dst.Green() = rgba[1] * a / 255;
+	//		dst.Blue() = rgba[2] * a / 255;
+	//		dst.Alpha() = a;
+	//		dst++;
+	//		rgba += 4;
+	//	}
+	//}
+
+	for (int y = 0; y < h; y++) {
+		dst.MoveTo(bmdata, 0, y);
+		for (int x = 0; x < w; x++) {
+			// wxBitmap contains rgb values pre-multiplied with alpha
+			unsigned char a = rgba[3];
+			dst.Red() = rgba[0];
+			dst.Green() = rgba[1];
+			dst.Blue() = rgba[2];
+			dst.Alpha() = a;
+			dst++;
+			rgba += 4;
+		}
+	}
+	return bitmap;
 }

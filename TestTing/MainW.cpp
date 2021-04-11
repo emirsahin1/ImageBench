@@ -68,13 +68,14 @@ void MainW::LoadImageButton(wxCommandEvent &evt)
 		//imagePanel->loadImage(imagePath);
 		ImageProcessor imgProc;
 		imgProc.loadImage(imagePath);
-		if(imgProc.imgAlpha == NULL){
-		imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight);
+		/*if(imgProc.imgAlpha == NULL){
+			imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight);
 		}
 		else {
 			imagePanel->loadImage(imgProc.imgData, imgProc.imgAlpha, imgProc.imageWidth, imgProc.imageHeight);
-		}
-		evt.Skip();
+		}*/
+		imagePanel->loadImage(imgProc.fullImageData, imgProc.imageWidth, imgProc.imageHeight, imgProc.numbChannels);
+		evt.Skip(); 
 	}
 }
 

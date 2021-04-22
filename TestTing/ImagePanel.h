@@ -28,7 +28,7 @@ private:
 	void initImageProps();
 	void initBitmapProps(wxBitmap bitmap);
 	void resetTransforms();
-	wxBitmap* RGBAtoBitmap(uint8_t* rgba, int w, int h);
+	wxBitmap RGBAtoBitmap(uint8_t* rgba, int w, int h);
 
 public:
 	ImagePanel(wxWindow* parent);

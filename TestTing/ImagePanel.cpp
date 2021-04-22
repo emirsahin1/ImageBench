@@ -1,8 +1,8 @@
 #include "ImagePanel.h"
 #include "wx/timer.h"
 #include <wx/rawbmp.h>
-//TODO: Clean the process of rendering.
-//TODO: Fix Pointers
+
+//TODO CONST
 wxBEGIN_EVENT_TABLE(ImagePanel, wxPanel)
 EVT_PAINT(ImagePanel::paintEvent)
 EVT_SIZE(ImagePanel::onSize)
@@ -41,7 +41,7 @@ void ImagePanel::loadImage(uint8_t* imageData, int x, int y, int channels) {
 	Refresh();
 	Update();
 	//Convert the raw data to bitmap first.
-	wxBitmap bitmapImage = *RGBAtoBitmap(imageData, x, y);
+	wxBitmap bitmapImage = RGBAtoBitmap(imageData, x, y);
 	if (bitmapImage.IsOk()) {
 		rendImage = bitmapImage;
 		resetTransforms();
@@ -82,18 +82,18 @@ void ImagePanel::loadImage(uint8_t* imageData, uint8_t* imageAlpha, int x, int y
 }
 
 //Converts raw RGB/RGBA data to a bitmap. 
-wxBitmap* ImagePanel::RGBAtoBitmap(uint8_t* rgba, int w, int h)
+wxBitmap ImagePanel::RGBAtoBitmap(uint8_t* rgba, int w, int h)
 {
-	wxBitmap* bitmap = new wxBitmap(w, h, wxBITMAP_SCREEN_DEPTH);
-	if (!bitmap->Ok()) {
-		delete bitmap;
+	wxBitmap bitmap = wxBitmap(w, h, 32);
+	if (!bitmap.Ok()) {
+		//delete bitmap;
 		return NULL;
 	}
 
-	wxAlphaPixelData bmdata(*bitmap);
+	wxAlphaPixelData bmdata(bitmap);
 	if (bmdata == NULL) {
 		wxLogDebug(wxT("getBitmap() failed"));
-		delete bitmap;
+		//delete bitmap;
 		return NULL;
 	}
 
@@ -125,16 +125,16 @@ void ImagePanel::initImageProps(){
 	aspRatio = imgw / imgh;
 }
 
-void ImagePanel::resetTransforms() {
-	scale = 1;
-	imageOffsetX = 0;
-	imageOffsetY = 0;
-}
-
 void ImagePanel::initBitmapProps(wxBitmap bitmap) {
 	imgw = bitmap.GetWidth();
 	imgh = bitmap.GetHeight();
 	aspRatio = imgw / imgh;
+}
+
+void ImagePanel::resetTransforms() {
+	scale = 1;
+	imageOffsetX = 0;
+	imageOffsetY = 0;
 }
 
 void ImagePanel::scaleToRatio(int contw, int conth) {
@@ -195,10 +195,9 @@ void ImagePanel::render(wxDC& dc) {
 void ImagePanel::renderLoading(wxDC& dc) {
 	    dc.SetUserScale(1, 1);
 		dc.DrawBitmap((wxBitmap)loadingScreen, (canvw - loadingScreen.GetWidth()) /2, (canvh -loadingScreen.GetHeight()) /2);
-		std::cout << isLoading << "ADAWDADAWD\n";
 }
 
-	
+//Event Handlers
 void ImagePanel::onScroll(wxMouseEvent& evt){
 	if (evt.GetWheelRotation() > 0) {
 		if(scale < 10)

@@ -67,14 +67,18 @@ void MainW::LoadImageButton(wxCommandEvent &evt)
 		wxLogNull logNo; 
 		//imagePanel->loadImage(imagePath);
 		ImageProcessor imgProc;
-		imgProc.loadImage(imagePath);
+		imgProc.loadImageDataRGBA(imagePath);
+		//cout << pixelTest.r << " " << pixelTest.b << " " << pixelTest.g << "\n";
+		cout << imgProc.getPixel(1, 1);
+		cout << imgProc.getPixel(102, 102);
+
 		/*if(imgProc.imgAlpha == NULL){
 			imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight);
 		}
 		else {
 			imagePanel->loadImage(imgProc.imgData, imgProc.imgAlpha, imgProc.imageWidth, imgProc.imageHeight);
 		}*/
-		imagePanel->loadImage(imgProc.fullImageData, imgProc.imageWidth, imgProc.imageHeight, imgProc.numbChannels);
+		imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight, imgProc.numbChannels);
 		evt.Skip(); 
 	}
 }

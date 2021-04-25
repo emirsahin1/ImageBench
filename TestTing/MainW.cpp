@@ -1,15 +1,15 @@
 #include "MainW.h"
 #include <wx/splitter.h>
+#include <wx/colordlg.h>
 #include "Theme.h"
 #include "ImageProcessor.h"
-#include <wx/colordlg.h>
 
 wxBEGIN_EVENT_TABLE(MainW, wxFrame)
 	EVT_BUTTON(1001, LoadImageButton)
 	EVT_BUTTON(1002, ColorPickerButton)
 wxEND_EVENT_TABLE()
 
-MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0), wxGetDisplaySize())
+MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0), wxGetDisplaySize()), imgProc(wxBitmap())
 {
 	m_flSelector = new wxFileDialog(this, "Select an image", wxEmptyString, wxEmptyString,
 	"PNG files (*.png)|*.png", wxFD_OPEN, wxDefaultPosition, wxSize(100, 100));
@@ -65,12 +65,10 @@ void MainW::LoadImageButton(wxCommandEvent &evt)
 		Update();
 		m_lstbox->AppendString(imagePath);
 		wxLogNull logNo; 
-		//imagePanel->loadImage(imagePath);
-		ImageProcessor imgProc;
-		imgProc.loadImageDataRGBA(imagePath);
+		//imgProc.loadImageDataRGBA(imagePath);
 		//cout << pixelTest.r << " " << pixelTest.b << " " << pixelTest.g << "\n";
-		cout << imgProc.getPixel(1, 1);
-		cout << imgProc.getPixel(102, 102);
+		//cout << imgProc.getPixel(1, 1);
+		//cout << imgProc.getPixel(102, 102);
 
 		/*if(imgProc.imgAlpha == NULL){
 			imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight);
@@ -78,11 +76,15 @@ void MainW::LoadImageButton(wxCommandEvent &evt)
 		else {
 			imagePanel->loadImage(imgProc.imgData, imgProc.imgAlpha, imgProc.imageWidth, imgProc.imageHeight);
 		}*/
-		imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight, imgProc.numbChannels);
+		//imagePanel->loadImage(imgProc.imgData, imgProc.imageWidth, imgProc.imageHeight, imgProc.numbChannels);
+		imagePanel->loadBitmap(imagePath);
+		imgProc.loadImageDataBMP(imagePanel->renderedBitmap);
 		evt.Skip(); 
 	}
 }
 
 void MainW::ColorPickerButton(wxCommandEvent& evt) {
-	m_clrDiag->ShowModal();
+	/*m_clrDiag->ShowModal();*/
+	imgProc.paintRed(imagePanel);
+	imagePanel->Refresh();
 }

@@ -1,6 +1,7 @@
 #include "ImagePanel.h"
 #include "wx/timer.h"
 #include <wx/rawbmp.h>
+#include "stb_image.h"
 
 //TODO CONST
 wxBEGIN_EVENT_TABLE(ImagePanel, wxPanel)
@@ -21,6 +22,22 @@ ImagePanel::ImagePanel(wxWindow* parent) :
 	SetDoubleBuffered(true);
 }
 
+void ImagePanel::loadBitmap(wxString path) {
+	isLoading = true;
+	Refresh();
+	Update();
+	int w, h, channels;
+	uint8_t* data = loadImageDataRGBA(path, &w, &h, &channels);
+	wxBitmap bmp = RGBAtoBitmap(data, w, h);
+	if (bmp.IsOk()) {
+		renderedBitmap = bmp;
+		resetTransforms();
+		initBitmapProps(renderedBitmap);
+		scaleToRatio(canvw, canvh);
+		Refresh();
+	}
+}
+
 //Load image using its path. 
 void ImagePanel::loadImage(wxString path) {
 	isLoading = true;
@@ -29,11 +46,14 @@ void ImagePanel::loadImage(wxString path) {
 	wxImage image;
 	image.LoadFile(path, wxBITMAP_TYPE_PNG);
 	if (image.IsOk()) {
-		initImageProps();
-		rendImage = (wxBitmap)image;
+		renderedBitmap = (wxBitmap)image;
+		resetTransforms();
+		initBitmapProps(renderedBitmap);
+		scaleToRatio(canvw, canvh);
 		Refresh();
 	}
 }
+
 
 //Load RGB/RGBA image using raw data. Converts to bitmap before render.  
 void ImagePanel::loadImage(uint8_t* imageData, int x, int y, int channels) {
@@ -43,7 +63,7 @@ void ImagePanel::loadImage(uint8_t* imageData, int x, int y, int channels) {
 	//Convert the raw data to bitmap first.
 	wxBitmap bitmapImage = RGBAtoBitmap(imageData, x, y);
 	if (bitmapImage.IsOk()) {
-		rendImage = bitmapImage;
+		renderedBitmap = bitmapImage;
 		resetTransforms();
 		initBitmapProps(bitmapImage);
 		scaleToRatio(canvw, canvh);
@@ -58,7 +78,7 @@ void ImagePanel::loadImage(uint8_t* imageData, int x, int y){
 	Update();
 	wxImage image = wxImage(x, y, imageData, true);
 	if (image.IsOk()) {
-		rendImage = (wxBitmap)image;
+		renderedBitmap = (wxBitmap)image;
 		resetTransforms();
 		initImageProps();
 		scaleToRatio(canvw, canvh);
@@ -73,12 +93,22 @@ void ImagePanel::loadImage(uint8_t* imageData, uint8_t* imageAlpha, int x, int y
 	Update();
 	wxImage image = wxImage(x, y, imageData, imageAlpha, true);
 	if (image.IsOk()) {
-		rendImage = (wxBitmap)image;
+		renderedBitmap = (wxBitmap)image;
 		resetTransforms();
 		initImageProps();
 		scaleToRatio(canvw, canvh);
 		Refresh();
 	}
+}
+
+//Loads RGBA raw Data using STBI. 
+uint8_t* ImagePanel::loadImageDataRGBA(const char* path, int* w, int* h, int* channels) {
+	int channelsRequired = 4;
+	uint8_t* imgData = stbi_load(path, w, h, channels, channelsRequired);
+	if (imgData != NULL) {
+		return imgData;
+	}
+	return NULL;
 }
 
 //Converts raw RGB/RGBA data to a bitmap. 
@@ -120,8 +150,8 @@ void ImagePanel::setLoading(bool isLoading){
 }
 
 void ImagePanel::initImageProps(){
-	imgw = rendImage.GetWidth();
-	imgh = rendImage.GetHeight();
+	imgw = renderedBitmap.GetWidth();
+	imgh = renderedBitmap.GetHeight();
 	aspRatio = imgw / imgh;
 }
 
@@ -171,7 +201,7 @@ void ImagePanel::paintEvent(wxPaintEvent& evt) {
 	imagePosX = (canvw / scale - imgw) / 2 + (panAmountX + imageOffsetX) / scale;
 	imagePosY = (canvh / scale - imgh) / 2 + (panAmountY + imageOffsetY) / scale;
 
-	if (rendImage.IsOk()) {
+	if (renderedBitmap.IsOk()) {
 		render(dc);
 	}
 	if (isLoading) {
@@ -189,7 +219,7 @@ void ImagePanel::paintNow() {
 //The render function which does the actual rendering to the screen. 
 void ImagePanel::render(wxDC& dc) {
 	dc.SetUserScale(scale, scale);
-	dc.DrawBitmap(rendImage, imagePosX, imagePosY, false);
+	dc.DrawBitmap(renderedBitmap, imagePosX, imagePosY, false);
 }
 
 void ImagePanel::renderLoading(wxDC& dc) {

@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/colordlg.h>
 #include "ImagePanel.h"
+#include "ImageProcessor.h"
 
 class MainW : public wxFrame
 {
@@ -11,6 +12,7 @@ public:
 	wxDECLARE_EVENT_TABLE();
 
 public:
+	ImageProcessor imgProc;
 	ImagePanel* imagePanel = nullptr;
 	wxString imagePath;
 	wxBoxSizer* hBox = nullptr; 

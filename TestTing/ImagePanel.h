@@ -11,7 +11,6 @@ private:
 	bool isPanning, isLoading;
 	wxCursor panCursor;
 	wxImage loadingScreen;
-	wxBitmap rendImage;
 private:
 	void onScroll(wxMouseEvent& evt);
 	void scaleToRatio(int neww, int newh);
@@ -29,11 +28,15 @@ private:
 	void initBitmapProps(wxBitmap bitmap);
 	void resetTransforms();
 	wxBitmap RGBAtoBitmap(uint8_t* rgba, int w, int h);
+	uint8_t* loadImageDataRGBA(const char* path, int *w, int *h, int* channels);
 
 public:
+	wxBitmap renderedBitmap;
+
 	ImagePanel(wxWindow* parent);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow();
+	void loadBitmap(wxString path);
 	void loadImage(wxString path);
 	void loadImage(uint8_t* imageData, int x, int y, int channels);
 	void loadImage(uint8_t* imageData, int x, int y);

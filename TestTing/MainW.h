@@ -13,18 +13,31 @@ public:
 
 public:
 	ImageProcessor imgProc;
-	ImagePanel* imagePanel = nullptr;
 	wxString imagePath;
-	wxBoxSizer* hBox = nullptr; 
-	wxPanel* mainPanel = nullptr; 
-	wxButton* m_btn1 = nullptr; 
-	wxTextCtrl* m_txt1 = nullptr; 
-	wxListBox* m_lstbox = nullptr; 
 	wxFileDialog* m_flSelector;
-	wxMenuBar* m_menuBar = nullptr; 
-	wxMenu* m_menu = nullptr; 
-	wxColourDialog* m_clrDiag = nullptr;
-	void ColorPickerButton(wxCommandEvent& evt);
+	wxColourDialog* r_clrDiag;
+
+
+	ImagePanel* imagePanel;
+	wxBoxSizer* m_hBox;
+	wxMenuBar* m_menuBar;
+	wxMenu* m_menu; 
+
+	wxPanel* rightPanel;
+	wxBoxSizer* r_vBox;
+	wxButton* r_btn1;
+	wxButton* r_btn2;
+	wxButton* r_btn3;
+	wxListBox* r_lstbox; 
+	wxCheckBox* r_prevCheckBox; 
+
+
+	void RemoveGreenScreen(wxCommandEvent& evt);
+	void InvertImage(wxCommandEvent& evt);
 	void LoadImageButton(wxCommandEvent &evt);
+	void SaveImage(wxCommandEvent& evt);
+
+private:
+	void CheckedRealTime(wxCommandEvent& evt);
 };
 

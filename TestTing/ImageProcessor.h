@@ -19,11 +19,15 @@ public:
 		return stream;
 	}
 
+	bool prevRealtime;
+	int imageWidth, imageHeight, dataLength, numbChannels, previewRate;
+	wxPanel* renderPanel;
 	uint8_t* imgData;
-	int imageWidth, imageHeight, dataLength, numbChannels;
 
 	ImageProcessor::Pixel getPixel(int x, int y);
-	void paintRed(wxPanel* panel);
+	void RemoveGreenScreen();
+	void InvertImage();
+	void BindPanel(wxPanel* panel);
 	void loadImageDataBMP(wxBitmap bmp);
 	void boxBlur();
 	void loadImageDataRGBA(const char* path);

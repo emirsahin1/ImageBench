@@ -5,7 +5,9 @@
 #include <memory>
 
 
-ImageProcessor::ImageProcessor(wxBitmap bmp) : imageWidth(0), imageHeight(0), dataLength(0), numbChannels(0), imgData(nullptr), pixelData(bmp){
+ImageProcessor::ImageProcessor(wxBitmap bmp) : imageWidth(0), imageHeight(0), dataLength(0), numbChannels(0), 
+											   imgData(nullptr), pixelData(bmp), prevRealtime(false), renderPanel(nullptr){
+	previewRate = 5;
 	imageHeight = bmp.GetHeight();
 	imageWidth = bmp.GetWidth();
 	iterator = wxAlphaPixelData::Iterator(pixelData);
@@ -16,7 +18,6 @@ void ImageProcessor::loadImageDataRGBA(const char* path) {
 	int channelsRequired = 4;
 	int x, y;
 	imgData = stbi_load(path, &x, &y, &numbChannels, channelsRequired);
-
 	if (imgData != NULL) {
 		imageWidth = x;
 		imageHeight = y;
@@ -48,8 +49,26 @@ void ImageProcessor::boxBlur() {
 	}
 }
 
-void ImageProcessor::paintRed(wxPanel* panel) {
-	/*for (int y = 0; y < imageHeight; y++) {
+void ImageProcessor::RemoveGreenScreen() {
+	for (int y = 0; y < imageHeight; y++) {
+		iterator.MoveTo(pixelData, 0, y);
+		for (int x = 0; x < imageWidth; x++) {
+			if (iterator.Green() / (iterator.Red() + iterator.Blue() + 1) > 0) {
+				iterator.Alpha() = 0;
+			}
+			iterator++;
+		}
+		if (prevRealtime) {
+			if (y % previewRate == 0) {
+				renderPanel->Refresh();
+				renderPanel->Update();
+			}
+		}
+	}
+}
+
+void ImageProcessor::InvertImage() {
+	for (int y = 0; y < imageHeight; y++) {
 		iterator.MoveTo(pixelData, 0, y);
 		for (int x = 0; x < imageWidth; x++) {
 			iterator.Red() = 255 - iterator.Red();
@@ -57,19 +76,18 @@ void ImageProcessor::paintRed(wxPanel* panel) {
 			iterator.Blue() = 255 - iterator.Blue();
 			iterator++;
 		}
-		panel->Refresh();
-		panel->Update();
-	}*/
-	for (int y = 0; y < imageHeight; y++) {
-		iterator.MoveTo(pixelData, 0, y);
-		for (int x = 0; x < imageWidth; x++) {
-			iterator.Green() = (iterator.Blue() - iterator.Red()) * iterator.Green();
-			iterator++;
+		if (prevRealtime) {
+			if (y % previewRate == 0) {
+				renderPanel->Refresh();
+				renderPanel->Update();
+			}
 		}
-		if (y % 2 == 0) {
-			panel->Refresh();
-			panel->Update();
-		}
+	}
+}
+
+void ImageProcessor::BindPanel(wxPanel* panel) {
+	if (panel != nullptr) {
+		renderPanel = panel;
 	}
 }
 

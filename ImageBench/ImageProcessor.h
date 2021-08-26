@@ -27,6 +27,8 @@ public:
 	ImageProcessor::Pixel getPixel(int x, int y);
 	void RemoveGreenScreen();
 	void InvertImage();
+	void BrightnessControl(int brth);
+	void GrayScaleHSP();
 	void BindPanel(wxPanel* panel);
 	void loadImageDataBMP(wxBitmap bmp);
 	void boxBlur();

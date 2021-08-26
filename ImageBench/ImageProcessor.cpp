@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include <iostream>
 #include <memory>
-
+#include <cmath>
 
 ImageProcessor::ImageProcessor(wxBitmap bmp) : imageWidth(0), imageHeight(0), dataLength(0), numbChannels(0), 
 											   imgData(nullptr), pixelData(bmp), prevRealtime(false), renderPanel(nullptr){
@@ -61,6 +61,46 @@ void ImageProcessor::InvertImage() {
 			iterator.Red() = 255 - iterator.Red();
 			iterator.Green() = 255 - iterator.Green();
 			iterator.Blue() = 255 - iterator.Blue();
+			iterator++;
+		}
+		if (prevRealtime) {
+			PreviewProcess(y);
+		}
+	}
+}
+
+void ImageProcessor::BrightnessControl(int brth) {
+	for (int y = 0; y < imageHeight; y++) {
+		iterator.MoveTo(pixelData, 0, y);
+		for (int x = 0; x < imageWidth; x++) {
+			if (iterator.Red() + brth < 255 && iterator.Red() + brth > 0) {
+				iterator.Red() += brth;
+			}
+			if (iterator.Green() + brth < 255 && iterator.Green() + brth > 0) {
+				iterator.Green() += brth;
+			}
+			if (iterator.Blue() + brth < 255 && iterator.Blue() + brth > 0) {
+				iterator.Blue() += brth;
+			}
+			
+			iterator++;
+		}
+		if (prevRealtime) {
+			PreviewProcess(y);
+		}
+	}
+}
+
+void ImageProcessor::GrayScaleHSP() {
+	for (int y = 0; y < imageHeight; y++) {
+		iterator.MoveTo(pixelData, 0, y);
+		for (int x = 0; x < imageWidth; x++) {
+
+			int brightness = sqrt(0.299 * pow(iterator.Red(), 2) + 0.587 * pow(iterator.Green(), 2) + 0.114 * pow(iterator.Blue(), 2));
+			iterator.Red() = brightness;
+			iterator.Green() = brightness;
+			iterator.Blue() = brightness;
+
 			iterator++;
 		}
 		if (prevRealtime) {

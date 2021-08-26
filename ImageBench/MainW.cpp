@@ -2,23 +2,40 @@
 #include <wx/splitter.h>
 #include <wx/colordlg.h>
 #include "Theme.h"
-#include "ImageProcessor.h"
+#include "ImageProcessor.h" //TODO REMOVE THIS POSSIBKLY
+#include <wx/popupwin.h>
 
 wxBEGIN_EVENT_TABLE(MainW, wxFrame)
+	EVT_MENU(2001, LoadImageButton)
 	EVT_BUTTON(1001, LoadImageButton)
-	EVT_BUTTON(1002, RemoveGreenScreen)
-	EVT_BUTTON(1003, InvertImage)
+	EVT_MENU(3002, RemoveGreenScreen)
+	EVT_MENU(3003, InvertImage)
+	EVT_MENU(3001, OpenBrightnessFrame)
+	EVT_MENU(3007, GrayScaleImage)
 	EVT_CHECKBOX(1004, CheckedRealTime)
-	EVT_MENU(2001, SaveImage)
+	EVT_MENU(1004, CheckedRealTime)
+	EVT_COMMAND_SCROLL(1006, ChangeBrightness)
+	EVT_MENU(2002, SaveImage)
+	EVT_CLOSE(HideWindow)
 wxEND_EVENT_TABLE()
 
-MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0), wxGetDisplaySize()), imgProc(wxBitmap())
+MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0), wxGetDisplaySize()), imgProc(wxBitmap()), brightnessEvtID(1006)
 {
 	//Menu Bar
 	m_menuBar = new wxMenuBar();
-	m_menu = new wxMenu();
-	m_menu->Append(2001, wxString("Save"));
-	m_menuBar->Append(m_menu, wxString("File"));
+	fileMenu = new wxMenu();
+	editMenu = new wxMenu();
+	settingsMenu = new wxMenu();
+	fileMenu->Append(2001, wxString("Load"));
+	fileMenu->Append(2002, wxString("Save"));
+	editMenu->Append(3001, wxString("Brightness"));
+	editMenu->Append(3003, wxString("Invert"));
+	editMenu->Append(3007, wxString("GrayScale HSP"));
+	editMenu->Append(3002, wxString("Remove Green Screen"));
+	settingsMenu->Append(1004, wxString("Realtime Preview"), wxEmptyString, wxITEM_CHECK);
+	m_menuBar->Append(fileMenu, wxString("File"));
+	m_menuBar->Append(editMenu, wxString("Edit Image"));
+	m_menuBar->Append(settingsMenu, wxString("Settings"));
 	SetMenuBar(m_menuBar);
 
 	//Main Horizontal Box containing the imagePanel and rightPanel UI//
@@ -30,8 +47,7 @@ MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0)
 
 	//The vertical box inside the right panel//
 	r_btn1 = new wxButton(rightPanel, 1001, "Open Image", wxDefaultPosition, wxDefaultSize);
-	r_btn2 = new wxButton(rightPanel, 1002, "Remove Green", wxDefaultPosition, wxDefaultSize);
-	r_btn3 = new wxButton(rightPanel, 1003, "Invert Image", wxDefaultPosition, wxDefaultSize);
+
 	r_lstbox = new wxListBox(rightPanel, wxID_ANY);
 	r_clrDiag = new wxColourDialog(rightPanel, NULL);
 	r_prevCheckBox = new wxCheckBox(rightPanel, 1004, wxString("Real Time Preview"));
@@ -39,17 +55,16 @@ MainW::MainW() : wxFrame(nullptr, wxID_ANY, "Green Screen Remover", wxPoint(0,0)
 	r_prevCheckBox->SetFont(r_prevCheckBox->GetFont().MakeLarger().MakeBold());
 	
 	r_vBox = new wxBoxSizer(wxVERTICAL);
-	r_vBox->Add(r_btn1, 0, wxALIGN_CENTER | wxALL | wxEXPAND | wxSHAPED, 20);
 	r_vBox->Add(r_lstbox, 0, wxALIGN_CENTER | wxALL | wxEXPAND | wxSHAPED, 20);
 	r_vBox->Add(r_prevCheckBox, 0, wxALIGN_LEFT | wxALL | wxEXPAND, 20);
-	r_vBox->Add(r_btn3, 0, wxALIGN_CENTER | wxALL | wxEXPAND | wxSHAPED, 20);
-	r_vBox->Add(r_btn2, 0, wxALIGN_CENTER | wxALL | wxEXPAND | wxSHAPED, 20);
+	r_vBox->Add(r_btn1, 0, wxALIGN_CENTER | wxALL | wxEXPAND | wxSHAPED, 20);
+
+
 	rightPanel->SetMaxSize(wxSize(300, 1000));
 	rightPanel->SetSizer(r_vBox);
 	this->SetSizer(m_hBox);
 
 	imgProc.BindPanel(imagePanel);
-	
 	m_flSelector = new wxFileDialog(this, "Select an image", wxEmptyString, wxEmptyString,
 		"PNG files (*.png)|*.png", wxFD_OPEN, wxDefaultPosition, wxSize(100, 100));
 
@@ -107,8 +122,34 @@ void MainW::InvertImage(wxCommandEvent& evt) {
 	imagePanel->Refresh();
 }
 
+void MainW::GrayScaleImage(wxCommandEvent& evt) {
+	r_lstbox->AppendString("GrayScale Image");
+	imgProc.GrayScaleHSP();
+	imagePanel->Refresh();
+}
+
+void MainW::ChangeBrightness(wxScrollEvent& evt) {
+
+	imgProc.BrightnessControl(evt.GetPosition() / 5);
+	
+	/*brightnessPopup->SetSize(wxSize(500, 500));
+	brightnessPopup->CentreOnParent();*/
+	imagePanel->Refresh();
+	evt.Skip();
+}
+
+void MainW::OpenBrightnessFrame(wxCommandEvent& evt) {
+	brightnessFrame = new BrightnessFrame(this, wxID_ANY);
+	brightnessFrame->slider->SetId(brightnessEvtID);
+	brightnessFrame->Show();
+	evt.Skip();
+}
+
 void MainW::CheckedRealTime(wxCommandEvent& evt) {
 	imgProc.prevRealtime = evt.IsChecked();
+	r_prevCheckBox->SetValue(evt.IsChecked());
+	settingsMenu->Check(1004, evt.IsChecked());
+
 	evt.Skip();
 }
 
@@ -122,5 +163,9 @@ void MainW::SaveImage(wxCommandEvent& evt) {
 		wxImage imageSave = imagePanel->renderedBitmap.ConvertToImage();
 		imageSave.SaveFile(filename);
 	}
-	
+}
+
+void MainW::HideWindow(wxCloseEvent& evt) {
+	Hide();
+	evt.Skip();
 }

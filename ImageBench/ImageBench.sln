@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageBench", "TestTing.vcxproj", "{49D36960-EDCB-40A0-8F73-FB760420789E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageBench", "ImageBench.vcxproj", "{49D36960-EDCB-40A0-8F73-FB760420789E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +26,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8EF0AEC6-2545-4AC5-A122-F1099141A04C}
+		SolutionGuid = {7347F655-1663-474C-8213-D8FFF157028E}
 	EndGlobalSection
 EndGlobal

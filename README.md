@@ -19,9 +19,10 @@ ImageBench is an image processing program intended to be used to experiment with
 * OpenGL rendering
 
 ## Images
-https://prnt.sc/1wccz02
 
-https://prnt.sc/1wcd1cz
+[image1](https://prnt.sc/1wccz02)
 
-https://prnt.sc/1wcd3i3
+[image2](https://prnt.sc/1wcd1cz)
+
+[image3](https://prnt.sc/1wcd3i3)
 

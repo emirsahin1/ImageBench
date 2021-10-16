@@ -20,9 +20,9 @@ ImageBench is an image processing program intended to be used to experiment with
 
 ## Images
 
-[image1](https://ibb.co/3SmnvXg)
+[image1](https://i.ibb.co/HGTjCv5/mg1.png)
 
-[image2](https://ibb.co/GM8J9Wx)
+[image2](https://i.ibb.co/jwQ5zy6/mg2.png)
 
-[image3](https://ibb.co/s3ztzNM)
+[image3](https://i.ibb.co/LpHvHc2/mg3.png)
 

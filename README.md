@@ -1,7 +1,6 @@
 # ImageBench
 
-ImageBench is an image processing program written in C++, intended to be used to experiment with various image processing algorithms. It does not use any external libraries for the image proccessing. It currently renders images using the CPU but GPU rendering using OpenGL is planned. WxWidgets is used for the user interface.
-
+ImageBench is a wxWidgets based image processing program written in C++, intended to be used to experiment with various image processing algorithms. It does not use any external libraries for the image proccessing. It currently renders images using the CPU but GPU rendering using OpenGL is planned. 
 
 
 ## Implemented Features
@@ -13,10 +12,6 @@ ImageBench is an image processing program written in C++, intended to be used to
 * Realtime Preview of the algorithms 
 * Fast Panning-Zooming
 
-## Planned Features
-* Box blur
-* Pixel Selection and deletion
-* OpenGL rendering
 
 ## Images
 
